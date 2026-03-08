@@ -25,8 +25,19 @@ export class FriendInviteService {
         return await FriendInviteRepository.createInvite(inviteData);
     }
 
-    static async getPendingInvites(userId: string): Promise<FriendInvite[]> {
-        return await FriendInviteRepository.getPendingInvitesByReceiverId(userId);
+    static async getPendingInvites(userId: string): Promise<any[]> {
+        const invites = await FriendInviteRepository.getPendingInvitesByReceiverId(userId);
+
+        // Enhance with sender name
+        const enhancedInvites = await Promise.all(invites.map(async (invite: any) => {
+            const sender = await userRepository.findById(invite.invite_sender_id);
+            return {
+                ...invite.toObject ? invite.toObject() : invite,
+                sender_name: sender?.name || 'Usuário Desconhecido'
+            };
+        }));
+
+        return enhancedInvites;
     }
 
     static async respondToInvite(inviteId: string, status: FriendInviteStatus): Promise<FriendInvite> {
