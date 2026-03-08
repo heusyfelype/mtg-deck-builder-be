@@ -66,24 +66,6 @@ npm start
 
 ### Autenticação
 
-#### POST /api/auth/register
-Registra um novo usuário
-```json
-{
-  "name": "João Silva",
-  "email": "joao@exemplo.com",
-  "password": "MinhaSenh@123"
-}
-```
-
-#### POST /api/auth/login
-Faz login do usuário
-```json
-{
-  "email": "joao@exemplo.com",
-  "password": "MinhaSenh@123"
-}
-```
 
 #### POST /api/auth/refresh
 Renova o token JWT (requer token válido)

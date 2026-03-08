@@ -3,6 +3,7 @@ import { Card } from './card';
 export interface DeckCard {
     quantity: number;
     card: Card;
+    ownerId?: string;
 }
 
 export interface DeckByUser {
@@ -16,6 +17,7 @@ export interface DeckByUser {
 export interface DeckCardDTO {
     quantity: number | string;
     cardId: string;
+    ownerId?: string;
 }
 
 export interface SaveDeckDTO {

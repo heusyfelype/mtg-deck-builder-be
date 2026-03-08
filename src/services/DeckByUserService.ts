@@ -80,7 +80,8 @@ export class DeckByUserService {
             if (card) {
                 result.push({
                     quantity: Number(dto.quantity),
-                    card
+                    card,
+                    ownerId: dto.ownerId // Preserve borrowed status
                 });
             }
         }
