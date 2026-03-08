@@ -78,4 +78,14 @@ export class DeckByUserController {
             data: result
         });
     }
+
+    static async getSimplifiedDecks(req: Request, res: Response) {
+        const { userId } = req.params;
+        const decks = await DeckByUserService.getSimplifiedDecksByUserId(userId);
+
+        return res.status(200).json({
+            success: true,
+            data: decks
+        });
+    }
 }
