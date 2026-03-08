@@ -55,4 +55,8 @@ export class DeckByUserService {
     static async getDeckById(deckId: string) {
         return await DeckByUserRepository.getDeckById(deckId);
     }
+
+    static async deleteUserDecks(ids: string[]): Promise<any> {
+        return await DeckByUserRepository.deleteDecks(ids);
+    }
 }

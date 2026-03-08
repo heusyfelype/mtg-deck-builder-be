@@ -17,4 +17,7 @@ router.get('/single/:deckId', asyncHandler(DeckByUserController.getDeckById));
 // GET /api/decks-by-user/:userId — retrieve all decks for a user
 router.get('/:userId', asyncHandler(DeckByUserController.getUserDecks));
 
+// DELETE /api/decks-by-user — delete one or more decks by _id
+router.delete('/', asyncHandler(DeckByUserController.deleteUserDecks));
+
 export default router;

@@ -24,4 +24,8 @@ export class DeckByUserRepository {
     static async getDeckByUserIdAndName(userId: string, deckName: string): Promise<DeckByUser | null> {
         return await DeckByUserModel.findOne({ userId, deckName }).lean();
     }
+
+    static async deleteDecks(ids: string[]): Promise<any> {
+        return await DeckByUserModel.deleteMany({ _id: { $in: ids } });
+    }
 }

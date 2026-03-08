@@ -55,4 +55,27 @@ export class DeckByUserController {
             data: decks
         });
     }
+
+    static async deleteUserDecks(req: Request, res: Response) {
+        let { ids } = req.body;
+
+        if (!ids) {
+            return res.status(400).json({
+                success: false,
+                message: 'IDs não fornecidos'
+            });
+        }
+
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+
+        const result = await DeckByUserService.deleteUserDecks(ids);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Deck(s) deletado(s) com sucesso',
+            data: result
+        });
+    }
 }
