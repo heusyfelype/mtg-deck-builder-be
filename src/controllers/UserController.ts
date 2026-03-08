@@ -120,6 +120,22 @@ class UserController {
 
     return res.json(response);
   });
+
+  searchUsers = asyncHandler(async (req: Request, res: Response): Promise<Response> => {
+    const filter = req.query.filter as string || '';
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const result = await userService.searchUsers(filter, page, limit);
+
+    const response: ApiResponse = {
+      success: true,
+      message: 'Usuários recuperados com sucesso',
+      data: result
+    };
+
+    return res.json(response);
+  });
 }
 
 export const userController = new UserController();

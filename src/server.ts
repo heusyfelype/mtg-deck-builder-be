@@ -11,6 +11,8 @@ import { sanitRoutes } from './routes/sanitizeJSONDB';
 import cardRoutes from './routes/cardRoutes';
 import cardsByUserRoutes from './routes/cardsByUserRoutes';
 import deckByUserRoutes from './routes/deckByUserRoutes';
+import { friendInviteRoutes } from './routes/friendInviteRoutes';
+import { friendRoutes } from './routes/friendRoutes';
 
 import fs from 'fs';
 import path from 'path';
@@ -54,6 +56,8 @@ app.use('/api', sanitRoutes);
 app.use('/api/cards', cardRoutes);
 app.use('/api/cards-by-user', cardsByUserRoutes);
 app.use('/api/decks-by-user', deckByUserRoutes);
+app.use('/api/friend-invites', friendInviteRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Rota 404
 app.use('*', (_req, res) => {

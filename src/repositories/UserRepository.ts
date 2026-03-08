@@ -55,6 +55,29 @@ class UserRepository {
   async existsByEmail(email: string, _excludeId?: string): Promise<boolean> {
     return (await UserModel.exists({ email })) !== null;
   }
+
+  async searchUsers(filter: string, page: number = 1, limit: number = 10): Promise<{ users: User[], total: number }> {
+    const skip = (page - 1) * limit;
+    const query = filter
+      ? {
+        $or: [
+          { name: { $regex: filter, $options: 'i' } },
+          { email: { $regex: filter, $options: 'i' } }
+        ]
+      }
+      : {};
+
+    const [users, total] = await Promise.all([
+      UserModel.find(query)
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      UserModel.countDocuments(query)
+    ]);
+
+    return { users: users as unknown as User[], total };
+  }
 }
 
 export const userRepository = new UserRepository();

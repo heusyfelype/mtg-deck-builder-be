@@ -27,6 +27,13 @@ userRoutes.get('/profile', authMiddleware, userController.getProfile);
 userRoutes.get('/', authMiddleware, userController.getAllUsers);
 
 /**
+ * @route   GET /api/users/search
+ * @desc    Buscar usuários por nome ou email (paginado)
+ * @access  Private
+ */
+userRoutes.get('/search', authMiddleware, userController.searchUsers);
+
+/**
  * @route   GET /api/users/:id
  * @desc    Obter usuário por ID
  * @access  Private

@@ -87,7 +87,18 @@ class UserService {
     return await userRepository.delete(id);
   }
 
+  async searchUsers(filter: string, page: number = 1, limit: number = 10): Promise<{ users: any[], total: number }> {
+    const { users, total } = await userRepository.searchUsers(filter, page, limit);
 
+    return {
+      users: users.map((user: any) => ({
+        id: user.id || user._id,
+        name: user.name,
+        email: user.email
+      })),
+      total
+    };
+  }
 }
 
 export const userService = new UserService();
