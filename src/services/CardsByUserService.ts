@@ -54,7 +54,19 @@ export class CardsByUserService {
         await this.cardsByUserRepository.upsertMany(fullItems);
     }
 
-    async getUserCards(userId: string): Promise<CardsByUserItem[]> {
-        return this.cardsByUserRepository.findByUserId(userId);
+    async getUserCards(userId: string, page: number = 1, limit: number = 20) {
+        const { cards, total } = await this.cardsByUserRepository.findPaginatedByUserId(userId, page, limit);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return {
+            cards,
+            pagination: {
+                totalItems: total,
+                currentPage: page,
+                pageSize: limit,
+                totalPages
+            }
+        };
     }
 }

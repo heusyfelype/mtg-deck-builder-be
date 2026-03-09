@@ -109,7 +109,9 @@ export class CardService {
         if (query.color_identity) {
             // Assuming it comes comma-separated like "R,U"
             const colors = String(query.color_identity).split(',').map(c => c.trim().toUpperCase());
-            if (colors.length > 0) {
+            if (colors.includes('C')) {
+                filter.color_identity = { $size: 0 };
+            } else if (colors.length > 0) {
                 filter.color_identity = { $all: colors };
             }
         }

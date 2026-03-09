@@ -25,12 +25,15 @@ export const CardsByUserController = {
      */
     async getUserCards(req: Request, res: Response): Promise<void> {
         const { userId } = req.params;
-        const cards = await cardsByUserService.getUserCards(userId);
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 20;
+
+        const { cards, pagination } = await cardsByUserService.getUserCards(userId, page, limit);
 
         res.status(200).json({
             success: true,
             message: 'User cards retrieved successfully',
-            data: { cards }
+            data: { cards, pagination }
         });
     }
 };
