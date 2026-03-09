@@ -24,11 +24,13 @@ export const CardsByUserController = {
      * GET /api/cards-by-user/:userId
      */
     async getUserCards(req: Request, res: Response): Promise<void> {
-        const { userId } = req.params;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 20;
+        const { userId } = req.params;
 
-        const { cards, pagination } = await cardsByUserService.getUserCards(userId, page, limit);
+        console.log(`[CardsByUserController] Received request to get user cards with query: ${JSON.stringify(req.query)}`);
+
+        const { cards, pagination } = await cardsByUserService.getUserCards(req.query as any, userId, page, limit);
 
         res.status(200).json({
             success: true,

@@ -1,13 +1,10 @@
 import CardsByUserModel from '../models/CardsByUser';
-import CardModel from '../models/Card';
 import { CardsByUserItem } from '../types/cardsByUser';
-import { Card } from '../types/card';
 
 export class CardsByUserRepository {
-
-    async findCardsByIds(cardIds: string[]): Promise<Card[]> {
-        const cards = await CardModel.find({ id: { $in: cardIds } }).lean();
-        return cards as unknown as Card[];
+    async findCardsByIds(cardIds: string[]): Promise<CardsByUserItem[]> {
+        const cards = await CardsByUserModel.find({ 'card.id': { $in: cardIds } }).lean();
+        return cards;
     }
 
     async upsertMany(items: CardsByUserItem[]): Promise<void> {
@@ -24,13 +21,10 @@ export class CardsByUserRepository {
             }
 
             if (!card.colorKey) {
-                // canonicalize: sort then concat
-                try {
-                    const sorted = [...card.color_identity].sort();
+                card.colorKey = '';
+                const sorted = [...card.color_identity].sort();
+                if (sorted.length > 0)
                     card.colorKey = sorted.join('');
-                } catch (e) {
-                    card.colorKey = '';
-                }
             }
 
             return {
@@ -53,27 +47,35 @@ export class CardsByUserRepository {
     }
 
     async findPaginatedByUserId(
-        userId: string,
         page: number,
-        limit: number
+        limit: number,
+        filter: Record<string, any> = {}
     ): Promise<{ cards: CardsByUserItem[], total: number }> {
         const skip = (page - 1) * limit;
+
+        const matchFilter: Record<string, any> = { ...(filter || {}) };
+
+        if (!filter["card.type_line"]) {
+            matchFilter["card.type_line"] = { $not: /land/i };
+        }
+
         const results = await CardsByUserModel.aggregate([
-            { $match: { userId } },
+            { $match: matchFilter },
             {
                 $sort: {
-                    'card.colorKey': 1,
+                    'card.cmc': 1,
                     'card.colorCount': 1,
-                    'card.cmc': 1
+                    'card.colorKey': 1,
                 }
             },
             {
                 $facet: {
-                    metadata: [{ $count: 'total' }],
+                    metadata: [{ $count: "total" }],
                     data: [{ $skip: skip }, { $limit: limit }]
                 }
             }
         ]);
+
 
         const total = results[0]?.metadata?.[0]?.total || 0;
         const cards = results[0]?.data || [];

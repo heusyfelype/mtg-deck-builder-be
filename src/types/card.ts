@@ -130,4 +130,6 @@ export interface Card {
     prices: CardPrices;
     related_uris: CardRelatedUris;
     purchase_uris: CardPurchaseUris;
+    colorKey?: string;
+    colorCount?: number;
 }

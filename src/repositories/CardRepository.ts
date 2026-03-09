@@ -3,27 +3,21 @@ import CardModel from '../models/Card';
 import { Card } from '../types/card';
 
 export class CardRepository {
-    async findPaginated(skip: number, limit: number, filter: Record<string, any> = {}): Promise<{ cards: Card[], total: number }> {
-        // Use aggregation to sort by color_identity (alphabetically by concatenated colors),
-        // then by number of colors (ascending), then by cmc (ascending), and apply pagination.
-        // Expect `colorKey` and `colorCount` to be stored on documents to allow index-backed sort.
+    async findCardsByIds(cardIds: string[]): Promise<Card[]> {
+        const cards = await CardModel.find({ id: { $in: cardIds } }).lean();
+        return cards as unknown as Card[];
+    }
 
-        if(!filter['search-for-land']){
+    async findPaginated(skip: number, limit: number, filter: Record<string, any> = {}): Promise<{ cards: Card[], total: number }> {
+
+        const matchFilter: Record<string, any> = { ...(filter || {}) };
+
+        if (!filter["type_line"]) {
+            matchFilter.type_line = { $not: /land/i };
         }
 
-            // Expect `colorKey` and `colorCount` to be stored on documents to allow index-backed sort.
-            // If the caller did not explicitly filter by `type_line` (i.e. by lands),
-            // add a default filter to exclude lands from results.
-            const filterStr = JSON.stringify(filter || {});
-            const hasTypeLineFilter = filterStr.includes('"type_line"');
-            const matchFilter: Record<string, any> = { ...(filter || {}) };
-
-            if (!hasTypeLineFilter) {
-                matchFilter.type_line = { $not: /land/i };
-            }
-
-            const results = await CardModel.aggregate([
-                { $match: matchFilter },
+        const results = await CardModel.aggregate([
+            { $match: matchFilter },
             {
                 $sort: {
 

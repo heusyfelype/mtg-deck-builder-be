@@ -100,6 +100,7 @@ async function migrateCardsByUser(batchSize = 1000) {
     console.log('cardsByUser migration completed.');
 }
 
+//run this script with `node -r ts-node/register src/scripts/migrateColorFields.ts` to create necessary migrations.
 async function run() {
     await connectDB();
 

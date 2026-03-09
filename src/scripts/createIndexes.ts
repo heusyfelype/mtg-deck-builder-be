@@ -19,3 +19,5 @@ createIndexes().catch((err) => {
     console.error('Error creating indexes:', err);
     process.exit(1);
 });
+
+//run this script with `node -r ts-node/register src/scripts/createIndexes.ts` to create the necessary indexes on the collections.

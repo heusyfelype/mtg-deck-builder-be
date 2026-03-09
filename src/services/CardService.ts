@@ -1,12 +1,15 @@
 
 import { CardRepository } from '../repositories/CardRepository';
-import { AppError } from '../types';
+import { CardsByUserRepository } from '../repositories/CardsByUserRepository';
+import { AppError, Card } from '../types';
 
 export class CardService {
     private cardRepository: CardRepository;
+    private cardByUserRepository: CardsByUserRepository;
 
     constructor() {
         this.cardRepository = new CardRepository();
+        this.cardByUserRepository = new CardsByUserRepository();
     }
 
     async getCards(queryParams: any) {
@@ -44,6 +47,8 @@ export class CardService {
         // Calculate total pages
         const totalPages = Math.ceil(total / limit);
 
+        await this.populateCardsWithUserQuantities(cards);
+
         return {
             cards,
             pagination: {
@@ -53,6 +58,19 @@ export class CardService {
                 totalPages: totalPages
             }
         };
+    }
+
+    async populateCardsWithUserQuantities(cards: Card[]) {
+        const cardsMap = new Map(cards.map(c => [c.id, c]));
+
+        const userCards = await this.cardByUserRepository.findCardsByIds(Array.from(cardsMap.keys()));
+
+        userCards.forEach(uc => {
+            const card = cardsMap.get(uc.card.id);
+            if (card) {
+                (card as any).quantity = uc.quantity;
+            }
+        });
     }
 
     private removeDiacriticsRegex(str: string): string {
