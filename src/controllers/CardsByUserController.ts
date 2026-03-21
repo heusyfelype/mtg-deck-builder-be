@@ -32,6 +32,8 @@ export const CardsByUserController = {
 
         const { cards, pagination } = await cardsByUserService.getUserCards(req.query as any, userId, page, limit);
 
+        console.log("CARDS IN CONTROLLER: ", cards)
+
         res.status(200).json({
             success: true,
             message: 'User cards retrieved successfully',

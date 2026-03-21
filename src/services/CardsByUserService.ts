@@ -83,66 +83,69 @@ export class CardsByUserService {
     private buildFilterQuery(query: any, userId: string): Record<string, any> {
         const filter: Record<string, any> = {};
 
-        if (query.lang) {
-            filter.card.lang = query.lang;
-        }
-
         if (!userId) {
             throw new AppError('UserId is required', 400);
         }
 
-        filter.userId = userId;
+        if (!filter.$and) filter.$and = [];
 
-        const textFields = ['printed_name', 'type_line', 'oracle_text', 'mana_cost'];
+        filter.$and.push({ userId });
 
+        const textFields = ['printed_name', 'type_line', 'oracle_text'];
+
+        const orConditions: any[] = [];
         textFields.forEach(field => {
             if (query[field]) {
-                if (!filter.$and) filter.$and = [];
 
                 const safeRegexString = this.removeDiacriticsRegex(query[field]);
 
-                filter.$and.push({
-                    $or: [
-                        { [`card.${field}`]: { $regex: safeRegexString, $options: 'i' } },
-                        { [`card.card_faces.${field}`]: { $regex: safeRegexString, $options: 'i' } }
-                    ]
-                });
+                orConditions.push(
+                    { [`card.${field}`]: { $regex: safeRegexString, $options: 'i' } },
+                    {
+                        [`card.card_faces`]: {
+                            $elemMatch: {
+                                [`printed_name`]: { $regex: safeRegexString, $options: "i" }
+                            }
+                        }
+                    }
+                );
             }
         });
 
+        if (orConditions.length > 0) {
+            filter.$and.push({ $or: orConditions });
+        }
+
         // 3. Regex match specifically for set_name
         if (query.set_name) {
-            if (!filter.card) filter.card = {};
             const safeSetRegexString = this.removeDiacriticsRegex(query.set_name);
-            filter.card.set_name = { $regex: safeSetRegexString, $options: 'i' };
+            filter.$and.push({ 'card.set_name': { $regex: safeSetRegexString, $options: 'i' } });
         }
 
-        // 4. Exact Numeric Match (CMC)
+        // // 4. Exact Numeric Match (CMC)
         if (query.cmc) {
-            if (!filter.card) filter.card = {};
             const cmcValue = Number(query.cmc);
             if (!isNaN(cmcValue)) {
-                filter.card.cmc = cmcValue;
+                filter.$and.push({ 'card.cmc': cmcValue });
             }
         }
 
-        // 5. Array explicitly includes (Color Identity "R,U" -> requires both R and U)
+        // // 5. Array explicitly includes (Color Identity "R,U" -> requires both R and U)
         if (query.color_identity) {
-            if (!filter.card) filter.card = {};
-            // Assuming it comes comma-separated like "R,U"
             const colors = String(query.color_identity).split(',').map(c => c.trim().toUpperCase());
+
+            console.log("COLORS: ", colors)
             if (colors.includes('C')) {
-                filter.card.color_identity = { $size: 0 };
+                filter.$and.push({ 'card.color_identity': { $size: 0 } })
             } else if (colors.length > 0) {
-                filter.card.color_identity = { $all: colors };
+                filter.$and.push({ 'card.color_identity': { $all: colors } })
             }
         }
 
-        // 6. Dot notation object matches (e.g., legalities[standard]=legal)
+        // // 6. Dot notation object matches (e.g., legalities[standard]=legal)
         if (query.legalities && typeof query.legalities === 'object') {
-            if (!filter.card) filter.card = {};
             Object.keys(query.legalities).forEach(format => {
-                filter.card[`legalities.${format}`] = query.legalities[format];
+                filter.$and.push({ [`card.legalities.${format}`]: query.legalities[format] });
             });
         }
 

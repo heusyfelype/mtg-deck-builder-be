@@ -16,11 +16,12 @@ export class CardRepository {
             matchFilter.type_line = { $not: /land/i };
         }
 
+        console.log("\n \n FILTER IN CARDS: ", JSON.stringify(matchFilter))
+
         const results = await CardModel.aggregate([
             { $match: matchFilter },
             {
                 $sort: {
-
                     cmc: 1,
                     colorCount: 1,
                     colorKey: 1,

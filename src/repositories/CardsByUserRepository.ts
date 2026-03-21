@@ -55,31 +55,18 @@ export class CardsByUserRepository {
 
         const matchFilter: Record<string, any> = { ...(filter || {}) };
 
-        if (!filter["card.type_line"]) {
+        if (!filter["card"]?.["type_line"]) {
             matchFilter["card.type_line"] = { $not: /land/i };
         }
 
-        const results = await CardsByUserModel.aggregate([
-            { $match: matchFilter },
-            {
-                $sort: {
-                    'card.cmc': 1,
-                    'card.colorCount': 1,
-                    'card.colorKey': 1,
-                }
-            },
-            {
-                $facet: {
-                    metadata: [{ $count: "total" }],
-                    data: [{ $skip: skip }, { $limit: limit }]
-                }
-            }
-        ]);
+        const total = await CardsByUserModel.countDocuments(matchFilter);
 
+        const cards = await CardsByUserModel.find(matchFilter).sort({
+            'card.cmc': 1,
+            'card.colorCount': 1,
+            'card.colorKey': 1,
+        }).limit(limit).skip(skip);
 
-        const total = results[0]?.metadata?.[0]?.total || 0;
-        const cards = results[0]?.data || [];
-
-        return { cards, total };
+        return { cards: cards as unknown as CardsByUserItem[], total };
     }
 }
