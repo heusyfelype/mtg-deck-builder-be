@@ -92,7 +92,7 @@ export class CardService {
         }
 
         // 2. Regex matches for Root OR Nested inside card_faces
-        const textFields = ['printed_name', 'type_line', 'oracle_text', 'mana_cost'];
+        const textFields = ['printed_name', 'type_line', 'mana_cost'];
 
         textFields.forEach(field => {
             if (query[field]) {
@@ -100,6 +100,17 @@ export class CardService {
 
                 const safeRegexString = this.removeDiacriticsRegex(query[field]);
 
+                if (field == 'printed_name') {
+                    filter.$and.push({
+                        $or: [
+                            { [field]: { $regex: safeRegexString, $options: 'i' } },
+                            { [`card_faces.${field}`]: { $regex: safeRegexString, $options: 'i' } },
+                            { [`oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
+                            { [`card_faces.oracle_text`]: { $regex: safeRegexString, $options: 'i' } }
+                        ]
+                    });
+                    return;
+                }
                 filter.$and.push({
                     $or: [
                         { [field]: { $regex: safeRegexString, $options: 'i' } },
