@@ -12,6 +12,7 @@ export class CardController {
 
     listCards = asyncHandler(async (req: Request, res: Response) => {
         // Pass the entire query object to the service
+        console.log("list cards was called: ", req.query)
         const result = await this.cardService.getCards(req.query as any);
 
         const response: ApiResponse = {

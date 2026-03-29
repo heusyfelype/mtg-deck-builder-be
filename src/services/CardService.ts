@@ -106,7 +106,9 @@ export class CardService {
                             { [field]: { $regex: safeRegexString, $options: 'i' } },
                             { [`card_faces.${field}`]: { $regex: safeRegexString, $options: 'i' } },
                             { [`oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
-                            { [`card_faces.oracle_text`]: { $regex: safeRegexString, $options: 'i' } }
+                            { [`card_faces.oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
+                            { [`printed_text`]: { $regex: safeRegexString, $options: 'i' } },
+                            { [`card_faces.printed_text`]: { $regex: safeRegexString, $options: 'i' } }
                         ]
                     });
                     return;
@@ -152,6 +154,7 @@ export class CardService {
             });
         }
 
+        console.log("FILTER IN CARDS: ", filter)
         return filter;
     }
 }
