@@ -28,10 +28,17 @@ export class CardsByUserService {
 
         // 3. Build the full items list — one CardsByUserItem per (userId + card)
         const fullItems: CardsByUserItem[] = [];
+        const itemsToDelete: { userId: string; cardId: string }[] = [];
         const notFoundIds: string[] = [];
 
         for (const dto of items) {
             for (const cardDto of dto.cards) {
+                const quantity = Number(cardDto.quantity);
+                if (quantity <= 0) {
+                    itemsToDelete.push({ userId: dto.userId, cardId: cardDto.cardId });
+                    continue;
+                }
+
                 const card = cardMap.get(cardDto.cardId);
                 if (!card) {
                     notFoundIds.push(cardDto.cardId);
@@ -39,7 +46,7 @@ export class CardsByUserService {
                 }
                 fullItems.push({
                     userId: dto.userId,
-                    quantity: Number(cardDto.quantity),
+                    quantity,
                     card
                 });
             }
@@ -49,12 +56,19 @@ export class CardsByUserService {
             console.warn(`[CardsByUserService] Cards not found in allCards: ${notFoundIds.join(', ')}`);
         }
 
-        if (fullItems.length === 0) {
-            throw new AppError('None of the provided cardIds were found in the database', 404);
+        if (fullItems.length === 0 && itemsToDelete.length === 0) {
+            throw new AppError('No valid cards provided to update or delete', 400);
         }
 
         // 4. Upsert — one record per (userId + card.id)
-        await this.cardsByUserRepository.upsertMany(fullItems);
+        if (fullItems.length > 0) {
+            await this.cardsByUserRepository.upsertMany(fullItems);
+        }
+
+        // 5. Delete cards with quantity <= 0
+        if (itemsToDelete.length > 0) {
+            await this.cardsByUserRepository.bulkDelete(itemsToDelete);
+        }
     }
 
     async getUserCards(queryParams: any, userId: string, page: number = 1, limit: number = 20) {

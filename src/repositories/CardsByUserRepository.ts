@@ -41,6 +41,18 @@ export class CardsByUserRepository {
         }
     }
 
+    async bulkDelete(items: { userId: string; cardId: string }[]): Promise<void> {
+        if (items.length === 0) return;
+
+        const bulkOps = items.map((item) => ({
+            deleteOne: {
+                filter: { userId: item.userId, 'card.id': item.cardId }
+            }
+        }));
+
+        await CardsByUserModel.bulkWrite(bulkOps);
+    }
+
     async findByUserId(userId: string): Promise<CardsByUserItem[]> {
         const docs = await CardsByUserModel.find({ userId }).lean();
         return docs as unknown as CardsByUserItem[];
