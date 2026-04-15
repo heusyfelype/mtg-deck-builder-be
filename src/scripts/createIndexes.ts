@@ -15,7 +15,10 @@ async function createIndexes() {
     process.exit(0);
 }
 
-createIndexes().catch((err) => {
+createIndexes().then(() => {
+    console.log('Indexes created.');
+    process.exit(0);
+}).catch((err) => {
     console.error('Error creating indexes:', err);
     process.exit(1);
 });

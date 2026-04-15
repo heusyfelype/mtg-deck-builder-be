@@ -25,6 +25,7 @@ export class CardRepository {
                     cmc: 1,
                     colorCount: 1,
                     colorKey: 1,
+                    _id: 1
                 }
             },
             {

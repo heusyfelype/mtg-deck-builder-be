@@ -111,7 +111,10 @@ async function run() {
     process.exit(0);
 }
 
-run().catch((err) => {
+run().then(() => {
+    console.log('Migration finished.');
+    process.exit(0);
+}).catch((err) => {
     console.error('Migration error:', err);
     process.exit(1);
 });

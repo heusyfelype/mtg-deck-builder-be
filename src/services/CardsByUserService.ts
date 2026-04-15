@@ -73,6 +73,8 @@ export class CardsByUserService {
 
     async getUserCards(queryParams: any, userId: string, page: number = 1, limit: number = 20) {
 
+        console.log("getUserCards STARTED with params: ", queryParams);
+
         if (limit > 100) {
             limit = 100;
         }
@@ -115,14 +117,36 @@ export class CardsByUserService {
 
                 orConditions.push(
                     { [`card.${field}`]: { $regex: safeRegexString, $options: 'i' } },
-                    {
-                        [`card.card_faces`]: {
-                            $elemMatch: {
-                                [`printed_name`]: { $regex: safeRegexString, $options: "i" }
-                            }
-                        }
-                    }
                 );
+
+                if (field == 'printed_name') {
+                    orConditions.push(
+                        { [`card.name`]: { $regex: safeRegexString, $options: 'i' } },
+                        {
+                            [`card.card_faces`]: {
+                                $elemMatch: {
+                                    [`printed_name`]: { $regex: safeRegexString, $options: "i" }
+                                }
+                            }
+                        },
+                        {
+                            [`card.card_faces`]: {
+                                $elemMatch: {
+                                    [`name`]: { $regex: safeRegexString, $options: "i" }
+                                }
+                            }
+                        },
+                    );
+                    return;
+                }
+                if (field == 'oracle_text') {
+                    orConditions.push(
+                        { [`card.oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
+                        { [`card.card_faces.oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
+                        { [`card.printed_text`]: { $regex: safeRegexString, $options: 'i' } },
+                        { [`card.card_faces.printed_text`]: { $regex: safeRegexString, $options: 'i' } }
+                    )
+                }
             }
         });
 
@@ -162,6 +186,8 @@ export class CardsByUserService {
                 filter.$and.push({ [`card.legalities.${format}`]: query.legalities[format] });
             });
         }
+
+        console.log("FILTER: ", JSON.stringify(filter, null, 2));
 
         return filter;
     }

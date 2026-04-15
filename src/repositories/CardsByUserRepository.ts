@@ -77,6 +77,7 @@ export class CardsByUserRepository {
             'card.cmc': 1,
             'card.colorCount': 1,
             'card.colorKey': 1,
+            '_id': 1
         }).limit(limit).skip(skip);
 
         return { cards: cards as unknown as CardsByUserItem[], total };

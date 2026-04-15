@@ -104,7 +104,9 @@ export class CardService {
                     filter.$and.push({
                         $or: [
                             { [field]: { $regex: safeRegexString, $options: 'i' } },
+                            { ['name']: { $regex: safeRegexString, $options: 'i' } },
                             { [`card_faces.${field}`]: { $regex: safeRegexString, $options: 'i' } },
+                            { [`card_faces.name`]: { $regex: safeRegexString, $options: 'i' } },
                             { [`oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
                             { [`card_faces.oracle_text`]: { $regex: safeRegexString, $options: 'i' } },
                             { [`printed_text`]: { $regex: safeRegexString, $options: 'i' } },
